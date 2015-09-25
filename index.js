@@ -19,31 +19,76 @@ var glob = require('glob'),
     strategies = [],
     models = [];
 
-exports.routers = function(dirname) {
+exports.routers = function(dirname,load) {
   if (dirname) {
     routers = glob.sync(conf.routerPattern).map(function(to) {
       return './' + path.relative(dirname,to);
     });
   }
+  switch(typeof load) {
+    case 'undefined':
+      break; // no action
+    case 'boolean':
+      routers.forEach(function(loc) {
+        require(path.join(dirname,loc));
+      });
+      break;
+    case 'function':
+      routers.forEach(function(loc) {
+        var mod = require(path.join(dirname,loc));
+        load(mod,loc);
+      });
+      break;
+  }
 
   return routers;
 };
 
-exports.strategies = function(dirname) {
+exports.strategies = function(dirname, load) {
   if (dirname) {
     strategies = glob.sync(conf.strategyPattern).map(function(to) {
       return './' + path.relative(dirname,to);
     });
   }
+  switch(typeof load) {
+    case 'undefined':
+      break; // no action
+    case 'boolean':
+      routers.forEach(function(loc) {
+        require(path.join(dirname,loc));
+      });
+      break;
+    case 'function':
+      routers.forEach(function(loc) {
+        var mod = require(path.join(dirname,loc));
+        load(mod,loc);
+      });
+      break;
+  }
 
   return strategies;
 };
 
-exports.models = function(dirname) {
+exports.models = function(dirname, load) {
   if (dirname) {
     models = glob.sync(conf.modelPattern).map(function(to) {
       return './' + path.relative(dirname, to);
     });
+  }
+  switch(typeof load) {
+    case 'undefined':
+      break; // no action
+    case 'boolean':
+      routers.forEach(function(loc) {
+        require(path.join(dirname,loc));
+      });
+      break;
+    case 'function':
+      routers.forEach(function(loc) {
+        var mod = require(path.join(dirname,loc));
+        load(mod,loc);
+      });
+      break;
   }
 
   return models;
