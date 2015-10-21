@@ -1,6 +1,6 @@
 {
   "name": "conventions",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Application Loading and Configuration Conventions",
   "repository": {
     "type": "git",

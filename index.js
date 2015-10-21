@@ -1,16 +1,22 @@
 var conf = {
-  routerPattern: '**/*.router.js',
-  strategyPattern: 'server/strategies/**/*.js',
-  modelPattern: '**/*.model.js'
-};
+    routerPattern: '**/*.router.js',
+    strategyPattern: 'server/strategies/**/*.js',
+    modelPattern: '**/*.model.js'
+  },
+  globOpts = {};
 
 /**
  * Conventions for locating parts of the client and server
  *
+ * Pass `cwd` for globbing in another working directory
+ *
  * @param config Object with matching configuration
  */
 exports.config = function(config) {
-
+  var cwd = config.basedir || config.cwd || config.root;
+  if (cwd) {
+    globOpts.cwd = cwd;
+  }
 };
 
 var glob = require('glob'),
@@ -19,10 +25,18 @@ var glob = require('glob'),
     strategies = [],
     models = [];
 
+function makeGlobOpts(dirname) {
+  if (globOpts.cwd) {
+    dirname = path.isAbsolute(dirname)? dirname : path.join(globOpts.cwd,dirname);
+  }
+  return { cwd: dirname };
+}
+
 exports.routers = function(dirname,load) {
   if (dirname) {
-    routers = glob.sync(conf.routerPattern).map(function(to) {
-      return './' + path.relative(dirname,to);
+    var opts = makeGlobOpts(dirname);
+    routers = glob.sync(conf.routerPattern,opts).map(function(to) {
+      return './' + to.replace('\\','/');
     });
   }
   switch(typeof load) {
@@ -30,12 +44,12 @@ exports.routers = function(dirname,load) {
       break; // no action
     case 'boolean':
       routers.forEach(function(loc) {
-        require(path.join(dirname,loc));
+        require(path.join(opts.cwd,loc));
       });
       break;
     case 'function':
       routers.forEach(function(loc) {
-        var mod = require(path.join(dirname,loc));
+        var mod = require(path.join(opts.cwd,loc));
         load(mod,loc);
       });
       break;
@@ -46,8 +60,9 @@ exports.routers = function(dirname,load) {
 
 exports.strategies = function(dirname, load) {
   if (dirname) {
-    strategies = glob.sync(conf.strategyPattern).map(function(to) {
-      return './' + path.relative(dirname,to);
+    var opts = makeGlobOpts(dirname);
+    strategies = glob.sync(conf.strategyPattern,opts).map(function(to) {
+      return './' + to.replace('\\','/');
     });
   }
   switch(typeof load) {
@@ -55,12 +70,12 @@ exports.strategies = function(dirname, load) {
       break; // no action
     case 'boolean':
       routers.forEach(function(loc) {
-        require(path.join(dirname,loc));
+        require(path.join(opts.cwd,loc));
       });
       break;
     case 'function':
       routers.forEach(function(loc) {
-        var mod = require(path.join(dirname,loc));
+        var mod = require(path.join(opts.cwd,loc));
         load(mod,loc);
       });
       break;
@@ -71,8 +86,9 @@ exports.strategies = function(dirname, load) {
 
 exports.models = function(dirname, load) {
   if (dirname) {
-    models = glob.sync(conf.modelPattern).map(function(to) {
-      return './' + path.relative(dirname, to);
+    var opts = makeGlobOpts(dirname);
+    models = glob.sync(conf.modelPattern,opts).map(function(to) {
+      return './' + to.replace('\\','/');
     });
   }
   switch(typeof load) {
@@ -80,12 +96,12 @@ exports.models = function(dirname, load) {
       break; // no action
     case 'boolean':
       routers.forEach(function(loc) {
-        require(path.join(dirname,loc));
+        require(path.join(opts.cwd,loc));
       });
       break;
     case 'function':
       routers.forEach(function(loc) {
-        var mod = require(path.join(dirname,loc));
+        var mod = require(path.join(opts.cwd,loc));
         load(mod,loc);
       });
       break;
