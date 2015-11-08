@@ -32,6 +32,12 @@ function makeGlobOpts(dirname) {
   return { cwd: dirname };
 }
 
+// joins arguments
+exports.absolutePath = function() {
+  var rel = path.join.apply(path,arguments);
+  return path.isAbsolute(rel)? rel : path.join(globOpts.cwd,rel);
+};
+
 exports.routers = function(dirname,load) {
   if (dirname) {
     var opts = makeGlobOpts(dirname);
