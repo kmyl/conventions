@@ -21,6 +21,7 @@ exports.config = function(config) {
 
 var glob = require('glob'),
     path = require('path'),
+    debug = require('debug')('conventions'),
     routers = [],
     strategies = [],
     models = [];
@@ -38,7 +39,7 @@ exports.absolutePath = function() {
   return path.isAbsolute(rel)? rel : path.join(globOpts.cwd,rel);
 };
 
-exports.routers = function(dirname,load) {
+exports.routers = function(dirname,load,fail) {
   if (dirname) {
     var opts = makeGlobOpts(dirname);
     routers = glob.sync(conf.routerPattern,opts).map(function(to) {
@@ -55,8 +56,18 @@ exports.routers = function(dirname,load) {
       break;
     case 'function':
       routers.forEach(function(loc) {
-        var mod = require(path.join(opts.cwd,loc));
-        load(mod,loc);
+        try {
+          var mod = require(path.join(opts.cwd,loc));
+        }
+        catch(ex) {
+          debug('failed to load router module %s: %s %s',loc,ex.message,ex.stack);
+          if (fail) {
+            fail(ex);
+          }
+        }
+        if (mod) {
+          load(mod,loc);
+        }
       });
       break;
   }
