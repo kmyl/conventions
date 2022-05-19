@@ -15,7 +15,7 @@
   "author": "Henrik Vendelbo",
   "dependencies": {
     "async": "3.2.3",
-    "debug": "4.3.2",
+    "debug": "4.3.4",
     "glob": "8.0.2"
   },
   "devDependencies": {
